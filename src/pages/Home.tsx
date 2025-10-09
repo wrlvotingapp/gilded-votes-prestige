@@ -31,7 +31,31 @@ const Home = () => {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-dark py-20 md:py-32">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,hsl(45_100%_51%/0.1),transparent)]" />
+        {/* Animated Sunrise Background */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background to-accent/20 animate-pulse" style={{ animationDuration: '8s' }} />
+        
+        {/* Animated Stars */}
+        <div className="absolute inset-0">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-primary rounded-full animate-pulse"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`,
+                opacity: 0.3 + Math.random() * 0.7,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Golden Glow Effect */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-glow-pulse" />
+        </div>
+
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold leading-tight">
