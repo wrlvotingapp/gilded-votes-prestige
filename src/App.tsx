@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SplashScreen } from "./components/SplashScreen";
 import { Navbar } from "./components/Navbar";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Vote from "./pages/Vote";
@@ -34,11 +35,11 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/vote" element={<Vote />} />
-                <Route path="/records" element={<Records />} />
-                <Route path="/news" element={<News />} />
-                <Route path="/certificates" element={<Certificates />} />
-                <Route path="/appointments" element={<Appointments />} />
+                <Route path="/vote" element={<ProtectedRoute><Vote /></ProtectedRoute>} />
+                <Route path="/records" element={<ProtectedRoute><Records /></ProtectedRoute>} />
+                <Route path="/news" element={<ProtectedRoute><News /></ProtectedRoute>} />
+                <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
+                <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

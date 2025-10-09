@@ -1,16 +1,25 @@
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/logo.jpg";
 import { Button } from "./ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, signOut, user } = useAuth();
+  const { toast } = useToast();
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navLinks = [
+  const publicLinks = [
+    { path: "/", label: "Home" },
+  ];
+
+  const authenticatedLinks = [
     { path: "/", label: "Home" },
     { path: "/vote", label: "Vote" },
     { path: "/records", label: "Records" },
@@ -18,6 +27,18 @@ export const Navbar = () => {
     { path: "/certificates", label: "Certificates" },
     { path: "/appointments", label: "Appointments" },
   ];
+
+  const navLinks = isAuthenticated ? authenticatedLinks : publicLinks;
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully",
+    });
+    navigate("/");
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -43,11 +64,22 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Link to="/auth">
-              <Button className="bg-gradient-gold text-background hover:opacity-90">
-                Sign In
+            {isAuthenticated ? (
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="border-primary text-primary hover:bg-primary/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
               </Button>
-            </Link>
+            ) : (
+              <Link to="/auth">
+                <Button className="bg-gradient-gold text-background hover:opacity-90">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -74,14 +106,26 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-              <Button className="w-full bg-gradient-gold text-background hover:opacity-90">
-                Sign In
+            {isAuthenticated ? (
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="w-full border-primary text-primary hover:bg-primary/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
               </Button>
-            </Link>
+            ) : (
+              <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                <Button className="w-full bg-gradient-gold text-background hover:opacity-90">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         )}
       </div>
     </nav>
   );
 };
+

@@ -31,29 +31,53 @@ const Home = () => {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-dark py-20 md:py-32">
-        {/* Animated Sunrise Background */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background to-accent/20 animate-pulse" style={{ animationDuration: '8s' }} />
-        
-        {/* Animated Stars */}
+        {/* Animated Sunrise Gradient Background */}
         <div className="absolute inset-0">
-          {[...Array(50)].map((_, i) => (
+          <div className="absolute inset-0 bg-gradient-to-b from-accent/30 via-background to-background animate-pulse" style={{ animationDuration: '6s' }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent animate-pulse" style={{ animationDuration: '8s', animationDelay: '1s' }} />
+        </div>
+        
+        {/* Twinkling Stars */}
+        <div className="absolute inset-0">
+          {[...Array(80)].map((_, i) => (
             <div
               key={i}
-              className="absolute w-1 h-1 bg-primary rounded-full animate-pulse"
+              className="absolute rounded-full bg-primary animate-pulse"
               style={{
+                width: `${1 + Math.random() * 2}px`,
+                height: `${1 + Math.random() * 2}px`,
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
-                opacity: 0.3 + Math.random() * 0.7,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${1.5 + Math.random() * 2.5}s`,
+                opacity: 0.2 + Math.random() * 0.8,
+                boxShadow: `0 0 ${2 + Math.random() * 4}px hsl(45 100% 51% / 0.8)`,
               }}
             />
           ))}
         </div>
 
-        {/* Golden Glow Effect */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-glow-pulse" />
+        {/* Shooting Stars */}
+        <div className="absolute inset-0">
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={`shooting-${i}`}
+              className="absolute h-px w-12 bg-gradient-to-r from-transparent via-primary to-transparent opacity-0"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 50}%`,
+                animation: `shooting-star 3s linear infinite`,
+                animationDelay: `${i * 4}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Multiple Golden Glow Orbs */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-[100px] animate-glow-pulse" />
+          <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-accent/15 rounded-full blur-[120px] animate-glow-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/25 rounded-full blur-[140px] animate-glow-pulse" style={{ animationDelay: '4s' }} />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
