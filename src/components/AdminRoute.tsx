@@ -16,9 +16,12 @@ export const AdminRoute = ({ children }: { children: React.ReactNode }) => {
         .select("role")
         .eq("user_id", user.id)
         .eq("role", "admin")
-        .single();
+        .maybeSingle();
 
-      if (error) return false;
+      if (error) {
+        console.error("Admin check error:", error);
+        return false;
+      }
       return !!data;
     },
     enabled: !!user,
