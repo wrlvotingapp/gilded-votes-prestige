@@ -1,10 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, Shield } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/logo.jpg";
 import { Button } from "./ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,6 +16,21 @@ export const Navbar = () => {
   const { toast } = useToast();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin", user?.id],
+    queryFn: async () => {
+      if (!user) return false;
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user,
+  });
 
   const publicLinks = [
     { path: "/", label: "Home" },
@@ -64,6 +81,12 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link to="/admin" className="flex items-center text-primary hover:text-primary/80 font-semibold">
+                <Shield className="w-4 h-4 mr-1" />
+                Admin
+              </Link>
+            )}
             {isAuthenticated ? (
               <Button
                 onClick={handleSignOut}
@@ -106,6 +129,12 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="flex items-center py-2 text-primary hover:text-primary/80 font-semibold">
+                <Shield className="w-4 h-4 mr-1" />
+                Admin
+              </Link>
+            )}
             {isAuthenticated ? (
               <Button
                 onClick={handleSignOut}
