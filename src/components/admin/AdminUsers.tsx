@@ -33,11 +33,19 @@ export const AdminUsers = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select(`
-          *,
-          user_roles (role)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: roles } = useQuery({
+    queryKey: ["admin-user-roles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
       if (error) throw error;
       return data;
     },
@@ -133,7 +141,7 @@ export const AdminUsers = () => {
               </TableRow>
             ) : (
               users?.map((user: any) => {
-                const isAdmin = user.user_roles?.some((r: any) => r.role === "admin");
+                const isAdmin = roles?.some((r: any) => r.user_id === user.id && r.role === "admin");
                 const isBanned = user.status === "banned";
                 return (
                   <TableRow key={user.id}>
