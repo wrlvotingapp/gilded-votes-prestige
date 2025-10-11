@@ -138,6 +138,7 @@ export type Database = {
       certificates: {
         Row: {
           candidate_id: string | null
+          certificate_file_url: string | null
           certificate_url: string | null
           id: string
           issued_at: string | null
@@ -147,6 +148,7 @@ export type Database = {
         }
         Insert: {
           candidate_id?: string | null
+          certificate_file_url?: string | null
           certificate_url?: string | null
           id?: string
           issued_at?: string | null
@@ -156,6 +158,7 @@ export type Database = {
         }
         Update: {
           candidate_id?: string | null
+          certificate_file_url?: string | null
           certificate_url?: string | null
           id?: string
           issued_at?: string | null
@@ -163,15 +166,7 @@ export type Database = {
           status?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "certificates_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "candidates"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -179,6 +174,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          status: string | null
           updated_at: string | null
         }
         Insert: {
@@ -186,6 +182,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          status?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -193,6 +190,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          status?: string | null
           updated_at?: string | null
         }
         Relationships: []
