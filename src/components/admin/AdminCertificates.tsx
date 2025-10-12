@@ -91,10 +91,13 @@ export const AdminCertificates = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Generate signed URL (valid for 1 year)
+      const { data: signedData, error: signedError } = await supabase.storage
         .from("certificates")
-        .getPublicUrl(fileName);
+        .createSignedUrl(fileName, 31536000); // 1 year in seconds
+
+      if (signedError) throw signedError;
+      const signedUrl = signedData.signedUrl;
 
       // Create certificate record
       const { error: insertError } = await supabase
@@ -102,7 +105,7 @@ export const AdminCertificates = () => {
         .insert({
           user_id: selectedUser,
           status: "approved",
-          certificate_file_url: publicUrl,
+          certificate_file_url: fileName, // Store path, not URL
           issued_at: new Date().toISOString(),
         });
 
@@ -110,12 +113,12 @@ export const AdminCertificates = () => {
 
       // Send email notification
       const { error: emailError } = await supabase.functions.invoke("send-certificate-email", {
-        body: { userId: selectedUser, certificateUrl: publicUrl },
+        body: { userId: selectedUser, certificateUrl: signedUrl },
       });
 
       if (emailError) console.error("Email error:", emailError);
       
-      return publicUrl;
+      return signedUrl;
     },
     onSuccess: () => {
       toast({ title: "Certificate sent successfully!" });

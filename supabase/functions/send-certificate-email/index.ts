@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "https://esm.sh/resend@4.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,27 +37,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (profileError) throw profileError;
 
-    // Note: This is a placeholder. You'll need to set up Resend or another email service
-    // For now, we'll just log the email details
-    console.log("Certificate email details:", {
-      to: profile.email,
-      name: profile.full_name,
-      certificateUrl,
+    console.log("Sending certificate email to:", profile.email);
+
+    // Send email using Resend
+    const emailResponse = await resend.emails.send({
+      from: "World Records <onboarding@resend.dev>",
+      to: [profile.email],
+      subject: "Your Certificate is Ready!",
+      html: `
+        <h1>Congratulations ${profile.full_name || ""}!</h1>
+        <p>Your certificate has been approved and is now ready for download.</p>
+        <p>You can view and download your certificate by logging into your account.</p>
+        <p><a href="${certificateUrl}" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-top: 16px;">Download Certificate</a></p>
+        <p style="margin-top: 24px; color: #6B7280;">Thank you for being part of our community!</p>
+      `,
     });
 
-    // TODO: Implement actual email sending with Resend
-    // const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-    // await resend.emails.send({
-    //   from: "certificates@yourdomain.com",
-    //   to: profile.email,
-    //   subject: "Your Certificate is Ready!",
-    //   html: `<p>Dear ${profile.full_name || "User"},</p>
-    //          <p>Your certificate is now available!</p>
-    //          <p><a href="${certificateUrl}">Download Certificate</a></p>`
-    // });
+    console.log("Email sent successfully:", emailResponse);
 
     return new Response(
-      JSON.stringify({ success: true, message: "Email notification logged" }),
+      JSON.stringify({ success: true, message: "Certificate email sent" }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
