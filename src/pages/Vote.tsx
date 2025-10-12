@@ -109,9 +109,12 @@ const Vote = () => {
       queryClient.invalidateQueries({ queryKey: ["candidates"] });
     },
     onError: (error: any) => {
+      const message = typeof error?.message === 'string' && /already voted|subcategory|duplicate key/i.test(error.message)
+        ? "You've already voted in this subcategory."
+        : (error?.message || "Failed to cast vote");
       toast({
         title: "Error",
-        description: error.message || "Failed to cast vote",
+        description: message,
         variant: "destructive",
       });
     },
