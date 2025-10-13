@@ -35,6 +35,45 @@ export type Database = {
         }
         Relationships: []
       }
+      appointments: {
+        Row: {
+          appointment_date: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          note: string | null
+          phone: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_date: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          note?: string | null
+          phone: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          note?: string | null
+          phone?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       candidate_images: {
         Row: {
           candidate_id: string
@@ -165,6 +204,36 @@ export type Database = {
           requested_at?: string | null
           status?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      news: {
+        Row: {
+          body: string
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }

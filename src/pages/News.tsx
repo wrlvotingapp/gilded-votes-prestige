@@ -1,7 +1,23 @@
 import { Card } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const News = () => {
+  const { data: news, isLoading } = useQuery({
+    queryKey: ["published-news"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("news")
+        .select("*")
+        .eq("published", true)
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4">
@@ -14,25 +30,31 @@ const News = () => {
           </div>
 
           <div className="space-y-6">
-            {[1, 2, 3].map((item) => (
-              <Card key={item} className="p-6 bg-card border-border hover:border-primary transition-all animate-fade-in">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <span>January 10, 2025</span>
-                  </div>
-                  <h2 className="text-2xl font-semibold">
-                    New Record Category Added: Luxury Yachts
-                  </h2>
-                  <p className="text-muted-foreground">
-                    We're excited to announce a new category for luxury yachts. Submit your nominations now!
-                  </p>
-                  <button className="text-primary hover:underline font-medium">
-                    Read more →
-                  </button>
-                </div>
+            {isLoading ? (
+              <Card className="p-6">
+                <p className="text-center text-muted-foreground">Loading...</p>
               </Card>
-            ))}
+            ) : news && news.length > 0 ? (
+              news.map((item) => (
+                <Card key={item.id} className="p-6 bg-card border-border hover:border-primary transition-all animate-fade-in">
+                  <div className="space-y-4">
+                    {item.cover_image_url && (
+                      <img src={item.cover_image_url} alt={item.title} className="w-full h-64 object-cover rounded" />
+                    )}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                      <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <h2 className="text-2xl font-semibold">{item.title}</h2>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{item.body}</p>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <Card className="p-6">
+                <p className="text-center text-muted-foreground">No news available yet.</p>
+              </Card>
+            )}
           </div>
         </div>
       </div>

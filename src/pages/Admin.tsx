@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { Settings, Users, Vote as VoteIcon, Award, FileText, Image, BarChart3 } from "lucide-react";
+import { Settings, Users, Vote as VoteIcon, Award, FileText, Image, BarChart3, Newspaper, Calendar } from "lucide-react";
 import { AdminLogo } from "@/components/admin/AdminLogo";
 import { AdminCategories } from "@/components/admin/AdminCategories";
 import { AdminSubcategories } from "@/components/admin/AdminSubcategories";
@@ -9,6 +9,8 @@ import { AdminCandidates } from "@/components/admin/AdminCandidates";
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminCertificates } from "@/components/admin/AdminCertificates";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
+import { AdminNews } from "@/components/admin/AdminNews";
+import { AdminAppointments } from "@/components/admin/AdminAppointments";
 
 const Admin = () => {
   return (
@@ -22,7 +24,7 @@ const Admin = () => {
 
           <Card className="p-6 bg-card border-border">
             <Tabs defaultValue="analytics" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2">
                 <TabsTrigger value="analytics" className="flex items-center justify-center">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Analytics
@@ -50,6 +52,14 @@ const Admin = () => {
                 <TabsTrigger value="certificates" className="flex items-center justify-center">
                   <Award className="w-4 h-4 mr-2" />
                   Certificates
+                </TabsTrigger>
+                <TabsTrigger value="news" className="flex items-center justify-center">
+                  <Newspaper className="w-4 h-4 mr-2" />
+                  News
+                </TabsTrigger>
+                <TabsTrigger value="appointments" className="flex items-center justify-center">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Appointments
                 </TabsTrigger>
               </TabsList>
 
@@ -79,6 +89,14 @@ const Admin = () => {
 
               <TabsContent value="certificates">
                 <AdminCertificates />
+              </TabsContent>
+
+              <TabsContent value="news">
+                <AdminNews />
+              </TabsContent>
+
+              <TabsContent value="appointments">
+                <AdminAppointments />
               </TabsContent>
             </Tabs>
           </Card>

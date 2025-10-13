@@ -39,10 +39,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending certificate email to:", profile.email);
 
-    // Send email using Resend
-    const emailResponse = await resend.emails.send({
+    const { data: emailData, error: emailError } = await resend.emails.send({
       from: "World Records <onboarding@resend.dev>",
-      to: [profile.email],
+      to: profile.email,
       subject: "Your Certificate is Ready!",
       html: `
         <h1>Congratulations ${profile.full_name || ""}!</h1>
@@ -53,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email sent successfully:", emailData);
 
     return new Response(
       JSON.stringify({ success: true, message: "Certificate email sent" }),
