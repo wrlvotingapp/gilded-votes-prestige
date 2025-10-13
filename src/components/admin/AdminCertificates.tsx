@@ -34,13 +34,30 @@ export const AdminCertificates = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("certificates")
-        .select(`
-          *,
-          profiles (email),
-          candidates (name)
-        `)
+        .select("*")
         .order("requested_at", { ascending: false });
       if (error) throw error;
+      
+      // Fetch related user emails and candidate names
+      if (data) {
+        const userIds = [...new Set(data.map(c => c.user_id))];
+        const candidateIds = [...new Set(data.map(c => c.candidate_id).filter(Boolean))];
+        
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, email")
+          .in("id", userIds);
+        
+        const { data: candidates } = candidateIds.length > 0 
+          ? await supabase.from("candidates").select("id, name").in("id", candidateIds)
+          : { data: [] };
+        
+        return data.map(cert => ({
+          ...cert,
+          profiles: profiles?.find(p => p.id === cert.user_id),
+          candidates: candidates?.find(c => c.id === cert.candidate_id),
+        }));
+      }
       return data;
     },
   });
@@ -74,6 +91,17 @@ export const AdminCertificates = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-certificates"] });
     },
   });
+
+  const getSignedUrl = async (filePath: string) => {
+    const { data, error } = await supabase.storage
+      .from("certificates")
+      .createSignedUrl(filePath, 3600); // 1 hour
+    if (error) {
+      console.error("Error generating signed URL:", error);
+      return null;
+    }
+    return data.signedUrl;
+  };
 
   const uploadAndSendCertificate = useMutation({
     mutationFn: async () => {
@@ -219,14 +247,16 @@ export const AdminCertificates = () => {
                       }
                     />
                   ) : cert.certificate_file_url ? (
-                    <a 
-                      href={cert.certificate_file_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
+                    <Button
+                      size="sm"
+                      variant="link"
+                      onClick={async () => {
+                        const url = await getSignedUrl(cert.certificate_file_url);
+                        if (url) window.open(url, "_blank");
+                      }}
                     >
                       View Certificate
-                    </a>
+                    </Button>
                   ) : (
                     cert.certificate_url || "-"
                   )}

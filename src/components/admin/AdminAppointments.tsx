@@ -22,10 +22,7 @@ export const AdminAppointments = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("appointments")
-        .select(`
-          *,
-          profiles!appointments_user_id_fkey(full_name, email)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
