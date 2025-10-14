@@ -51,7 +51,7 @@ export const TranslateButton = () => {
       <Button
         onClick={() => setIsOpen(true)}
         size="icon"
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-gold bg-gradient-to-br from-primary to-accent hover:shadow-glow transition-all duration-300 z-50"
+        className="fixed top-6 right-6 h-14 w-14 rounded-full shadow-gold bg-gradient-to-br from-primary to-accent hover:shadow-glow transition-all duration-300 z-50"
         aria-label="Translate page"
       >
         <Languages className="h-6 w-6 text-primary-foreground" />
