@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SplashScreen } from "./components/SplashScreen";
 import { Navbar } from "./components/Navbar";
+import { TranslateButton } from "./components/TranslateButton";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminRoute } from "./components/AdminRoute";
 import Home from "./pages/Home";
@@ -34,6 +35,7 @@ const App = () => {
           <BrowserRouter>
             <div className="min-h-screen bg-background">
               <Navbar />
+              <TranslateButton />
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/auth" element={<Auth />} />
