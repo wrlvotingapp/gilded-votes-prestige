@@ -22,6 +22,51 @@ const LANGUAGES = [
   { code: "ja", name: "日本語", flag: "🇯🇵" },
 ];
 
+// Translate a string using LibreTranslate
+async function translateText(text: string, targetLang: string) {
+  try {
+    const res = await fetch("https://libretranslate.com/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        q: text,
+        source: "auto",
+        target: targetLang,
+        format: "text",
+      }),
+    });
+    const data = await res.json();
+    return data.translatedText || text;
+  } catch (err) {
+    console.error("Translation error:", err);
+    return text;
+  }
+}
+
+// Traverse DOM and translate visible text nodes
+async function translatePage(targetLang: string) {
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+
+  const nodes: Text[] = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    const content = node.textContent?.trim();
+    if (content && content.length > 2 && !/^\s*$/.test(content)) {
+      nodes.push(node);
+    }
+  }
+
+  for (const textNode of nodes) {
+    const original = textNode.textContent || "";
+    const translated = await translateText(original, targetLang);
+    textNode.textContent = translated;
+  }
+}
+
 export const TranslateButton = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -33,15 +78,11 @@ export const TranslateButton = () => {
     }
   }, []);
 
-  const handleLanguageSelect = (langCode: string) => {
+  const handleLanguageSelect = async (langCode: string) => {
     localStorage.setItem("translate-language-selected", "true");
     setIsVisible(false);
     setIsOpen(false);
-
-    // Use Google Translate's URL-based translation
-    const currentUrl = window.location.href;
-    const translateUrl = `https://translate.google.com/translate?sl=auto&tl=${langCode}&u=${encodeURIComponent(currentUrl)}`;
-    window.location.href = translateUrl;
+    await translatePage(langCode);
   };
 
   if (!isVisible) return null;
