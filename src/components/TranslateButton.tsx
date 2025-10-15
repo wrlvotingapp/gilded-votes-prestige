@@ -14,57 +14,82 @@ const LANGUAGES = [
   { code: "es", name: "Español", flag: "🇪🇸" },
   { code: "en", name: "English", flag: "🇬🇧" },
   { code: "fr", name: "Français", flag: "🇫🇷" },
-  { code: "de", name: "Deutsch", flag: "🇩🇪" },
-  { code: "it", name: "Italiano", flag: "🇮🇹" },
-  { code: "pt", name: "Português", flag: "🇵🇹" },
-  { code: "ar", name: "العربية", flag: "🇸🇦" },
-  { code: "zh", name: "中文", flag: "🇨🇳" },
-  { code: "ja", name: "日本語", flag: "🇯🇵" },
 ];
 
-// Translate a string using LibreTranslate
-async function translateText(text: string, targetLang: string) {
-  try {
-    const res = await fetch("https://libretranslate.com/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        q: text,
-        source: "auto",
-        target: targetLang,
-        format: "text",
-      }),
-    });
-    const data = await res.json();
-    return data.translatedText || text;
-  } catch (err) {
-    console.error("Translation error:", err);
-    return text;
-  }
+import { supabase } from "@/integrations/supabase/client";
+
+// Call edge function to translate an array of strings in batch
+async function translateBatch(texts: string[], targetLang: string): Promise<string[]> {
+  const { data, error } = await supabase.functions.invoke("translate", {
+    body: { texts, targetLang },
+  });
+  if (error) throw error;
+  return (data?.translations as string[]) ?? texts;
 }
 
-// Traverse DOM and translate visible text nodes
+// Traverse DOM, collect unique visible text nodes, translate in batch, and replace
 async function translatePage(targetLang: string) {
+  const rejectTags = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "IFRAME", "CODE", "PRE"]);
+
   const walker = document.createTreeWalker(
     document.body,
     NodeFilter.SHOW_TEXT,
-    null
+    {
+      acceptNode: (node) => {
+        const parent = (node as Text).parentElement;
+        if (!parent) return NodeFilter.FILTER_REJECT;
+        if (rejectTags.has(parent.tagName)) return NodeFilter.FILTER_REJECT;
+        if (parent.closest("[data-no-translate], [aria-hidden='true']")) return NodeFilter.FILTER_REJECT;
+        const text = (node.textContent || "").trim();
+        if (!text || text.length < 2) return NodeFilter.FILTER_REJECT;
+        if (/^[\p{P}\p{S}]+$/u.test(text)) return NodeFilter.FILTER_REJECT; // only symbols/emojis
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    } as any
   );
 
   const nodes: Text[] = [];
-  let node;
-  while ((node = walker.nextNode())) {
-    const content = node.textContent?.trim();
-    if (content && content.length > 2 && !/^\s*$/.test(content)) {
-      nodes.push(node);
+  let node: Node | null;
+  while ((node = walker.nextNode())) nodes.push(node as Text);
+
+  // Build unique text list to avoid translating duplicates
+  const unique: string[] = [];
+  const indexMap = new Map<string, number>();
+  const buckets = new Map<string, Text[]>();
+
+  for (const n of nodes) {
+    const raw = (n.textContent || "").trim();
+    const key = raw;
+    if (!indexMap.has(key)) {
+      indexMap.set(key, unique.length);
+      unique.push(key);
+      buckets.set(key, [n]);
+    } else {
+      buckets.get(key)!.push(n);
     }
   }
 
-  for (const textNode of nodes) {
-    const original = textNode.textContent || "";
-    const translated = await translateText(original, targetLang);
-    textNode.textContent = translated;
+  if (unique.length === 0) return;
+
+  // Perform translation in one call
+  let result: string[] = [];
+  try {
+    result = await translateBatch(unique, targetLang);
+  } catch (e) {
+    console.error("translateBatch error", e);
+    return;
   }
+
+  // Apply translations
+  unique.forEach((original, i) => {
+    const translated = result[i] || original;
+    for (const t of buckets.get(original) || []) {
+      t.textContent = translated;
+    }
+  });
+
+  // Set document language for accessibility/SEO
+  document.documentElement.lang = targetLang;
 }
 
 export const TranslateButton = () => {
@@ -78,7 +103,7 @@ export const TranslateButton = () => {
     }
   }, []);
 
-  const handleLanguageSelect = async (langCode: string) => {
+const handleLanguageSelect = async (langCode: string) => {
     localStorage.setItem("translate-language-selected", "true");
     setIsVisible(false);
     setIsOpen(false);
@@ -92,7 +117,7 @@ export const TranslateButton = () => {
       <Button
         onClick={() => setIsOpen(true)}
         size="icon"
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-gold bg-gradient-to-br from-primary to-accent hover:shadow-glow transition-all duration-300 z-50"
+className="fixed top-6 right-6 h-14 w-14 rounded-full shadow-gold bg-gradient-to-br from-primary to-accent hover:shadow-glow transition-all duration-300 z-50"
         aria-label="Translate page"
       >
         <Languages className="h-6 w-6 text-primary-foreground" />
