@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SplashScreen } from "./components/SplashScreen";
+import { FollowUsScreen } from "./components/FollowUsScreen";
 import { Navbar } from "./components/Navbar";
 import { TranslateButton } from "./components/TranslateButton";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -23,6 +24,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
+  const [showFollowUs, setShowFollowUs] = useState(false);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -30,7 +32,12 @@ const App = () => {
         <Toaster />
         <Sonner />
         {showSplash ? (
-          <SplashScreen onComplete={() => setShowSplash(false)} />
+          <SplashScreen onComplete={() => {
+            setShowSplash(false);
+            setShowFollowUs(true);
+          }} />
+        ) : showFollowUs ? (
+          <FollowUsScreen onComplete={() => setShowFollowUs(false)} />
         ) : (
           <BrowserRouter>
             <div className="min-h-screen bg-background">

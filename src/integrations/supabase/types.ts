@@ -264,6 +264,36 @@ export type Database = {
         }
         Relationships: []
       }
+      social_media_links: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          icon: string
+          id: string
+          platform: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          icon: string
+          id?: string
+          platform: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          icon?: string
+          id?: string
+          platform?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       subcategories: {
         Row: {
           category_id: string

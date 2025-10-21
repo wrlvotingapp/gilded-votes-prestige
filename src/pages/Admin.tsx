@@ -11,6 +11,7 @@ import { AdminCertificates } from "@/components/admin/AdminCertificates";
 import { AdminAnalytics } from "@/components/admin/AdminAnalytics";
 import { AdminNews } from "@/components/admin/AdminNews";
 import { AdminAppointments } from "@/components/admin/AdminAppointments";
+import { AdminSocialMedia } from "@/components/admin/AdminSocialMedia";
 
 const Admin = () => {
   return (
@@ -24,7 +25,7 @@ const Admin = () => {
 
           <Card className="p-6 bg-card border-border">
             <Tabs defaultValue="analytics" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-2">
+              <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-10 gap-2">
                 <TabsTrigger value="analytics" className="flex items-center justify-center">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   Analytics
@@ -60,6 +61,10 @@ const Admin = () => {
                 <TabsTrigger value="appointments" className="flex items-center justify-center">
                   <Calendar className="w-4 h-4 mr-2" />
                   Appointments
+                </TabsTrigger>
+                <TabsTrigger value="social" className="flex items-center justify-center">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Social Media
                 </TabsTrigger>
               </TabsList>
 
@@ -97,6 +102,10 @@ const Admin = () => {
 
               <TabsContent value="appointments">
                 <AdminAppointments />
+              </TabsContent>
+
+              <TabsContent value="social">
+                <AdminSocialMedia />
               </TabsContent>
             </Tabs>
           </Card>
