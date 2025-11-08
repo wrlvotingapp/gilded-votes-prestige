@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { ThumbsUp, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { VoteCertificateModal } from "@/components/VoteCertificateModal";
 
 const Vote = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [showCertificate, setShowCertificate] = useState(false);
+  const [votedCandidate, setVotedCandidate] = useState<{ name: string; categoryName: string } | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -89,7 +92,7 @@ const Vote = () => {
 
       const { data: candidate } = await supabase
         .from("candidates")
-        .select("vote_count")
+        .select("name, vote_count")
         .eq("id", candidateId)
         .single();
 
@@ -98,9 +101,21 @@ const Vote = () => {
           .from("candidates")
           .update({ vote_count: candidate.vote_count + 1 })
           .eq("id", candidateId);
+        
+        return candidate.name;
       }
     },
-    onSuccess: () => {
+    onSuccess: (candidateName: string | undefined) => {
+      const category = categories?.find(c => c.id === selectedCategory);
+      
+      if (candidateName && category) {
+        setVotedCandidate({
+          name: candidateName,
+          categoryName: category.name,
+        });
+        setShowCertificate(true);
+      }
+
       toast({
         title: "Vote cast successfully!",
         description: "Your vote has been recorded.",
@@ -207,67 +222,78 @@ const Vote = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <Button
-            variant="ghost"
-            onClick={() => setSelectedSubcategory(null)}
-            className="mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Subcategories
-          </Button>
+    <>
+      <div className="min-h-screen bg-background py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto space-y-8">
+            <Button
+              variant="ghost"
+              onClick={() => setSelectedSubcategory(null)}
+              className="mb-4"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Subcategories
+            </Button>
 
-          <div className="text-center space-y-2 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl font-bold">Vote for Candidates</h1>
-            <p className="text-muted-foreground text-lg">
-              Cast your vote for your favorite
-            </p>
-          </div>
+            <div className="text-center space-y-2 animate-fade-in">
+              <h1 className="text-4xl md:text-5xl font-bold">Vote for Candidates</h1>
+              <p className="text-muted-foreground text-lg">
+                Cast your vote for your favorite
+              </p>
+            </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {candidates?.map((candidate) => {
-              const hasVoted = userVotes?.includes(candidate.id);
-              const mainImage = candidate.candidate_images?.[0]?.image_url;
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {candidates?.map((candidate) => {
+                const hasVoted = userVotes?.includes(candidate.id);
+                const mainImage = candidate.candidate_images?.[0]?.image_url;
 
-              return (
-                <Card
-                  key={candidate.id}
-                  className="overflow-hidden bg-card border-border hover:border-primary transition-all animate-fade-in"
-                >
-                  {mainImage && (
-                    <div
-                      className="w-full h-48 bg-muted bg-cover bg-center"
-                      style={{ backgroundImage: `url(${mainImage})` }}
-                    />
-                  )}
-                  <div className="p-4 space-y-3">
-                    <h3 className="text-xl font-semibold">{candidate.name}</h3>
-                    {candidate.description && (
-                      <p className="text-sm text-muted-foreground">{candidate.description}</p>
+                return (
+                  <Card
+                    key={candidate.id}
+                    className="overflow-hidden bg-card border-border hover:border-primary transition-all animate-fade-in"
+                  >
+                    {mainImage && (
+                      <div
+                        className="w-full h-48 bg-muted bg-cover bg-center"
+                        style={{ backgroundImage: `url(${mainImage})` }}
+                      />
                     )}
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="text-sm text-muted-foreground">
-                        {candidate.vote_count} votes
-                      </span>
-                      <Button
-                        onClick={() => voteMutation.mutate(candidate.id)}
-                        disabled={hasVoted || voteMutation.isPending}
-                        className="bg-gradient-gold text-background hover:opacity-90"
-                      >
-                        <ThumbsUp className="w-4 h-4 mr-2" />
-                        {hasVoted ? "Voted" : "Vote"}
-                      </Button>
+                    <div className="p-4 space-y-3">
+                      <h3 className="text-xl font-semibold">{candidate.name}</h3>
+                      {candidate.description && (
+                        <p className="text-sm text-muted-foreground">{candidate.description}</p>
+                      )}
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-sm text-muted-foreground">
+                          {candidate.vote_count} votes
+                        </span>
+                        <Button
+                          onClick={() => voteMutation.mutate(candidate.id)}
+                          disabled={hasVoted || voteMutation.isPending}
+                          className="bg-gradient-gold text-background hover:opacity-90"
+                        >
+                          <ThumbsUp className="w-4 h-4 mr-2" />
+                          {hasVoted ? "Voted" : "Vote"}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              );
-            })}
+                  </Card>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {votedCandidate && (
+        <VoteCertificateModal
+          open={showCertificate}
+          onOpenChange={setShowCertificate}
+          candidateName={votedCandidate.name}
+          categoryName={votedCandidate.categoryName}
+        />
+      )}
+    </>
   );
 };
 
