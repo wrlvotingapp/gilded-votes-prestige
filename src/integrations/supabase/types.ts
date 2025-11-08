@@ -264,6 +264,48 @@ export type Database = {
         }
         Relationships: []
       }
+      records: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          display_order: number | null
+          holder_name: string
+          id: string
+          image_url: string | null
+          record_value: string
+          title: string
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          holder_name: string
+          id?: string
+          image_url?: string | null
+          record_value: string
+          title: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          holder_name?: string
+          id?: string
+          image_url?: string | null
+          record_value?: string
+          title?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       social_media_links: {
         Row: {
           created_at: string
