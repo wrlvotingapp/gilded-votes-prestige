@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+const defaultLogo = logo;
+
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
@@ -30,6 +32,18 @@ export const Navbar = () => {
       return !!data;
     },
     enabled: !!user,
+  });
+
+  const { data: logoUrl } = useQuery({
+    queryKey: ["app-logo"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("app_settings")
+        .select("setting_value")
+        .eq("setting_key", "logo_url")
+        .maybeSingle();
+      return data?.setting_value || defaultLogo;
+    },
   });
 
   const publicLinks = [
@@ -62,7 +76,7 @@ export const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={logo} alt="OWR" className="w-10 h-10 rounded-lg object-cover shadow-gold" />
+            <img src={logoUrl || defaultLogo} alt="OWR" className="w-10 h-10 rounded-lg object-cover shadow-gold" />
             <span className="text-xl font-bold bg-gradient-gold bg-clip-text text-transparent">
               OWR VOTES
             </span>

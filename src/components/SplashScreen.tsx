@@ -1,8 +1,22 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.jpg";
 
 export const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   const [isVisible, setIsVisible] = useState(true);
+
+  const { data: logoUrl } = useQuery({
+    queryKey: ["app-logo"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("app_settings")
+        .select("setting_value")
+        .eq("setting_key", "logo_url")
+        .maybeSingle();
+      return data?.setting_value || logo;
+    },
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -23,7 +37,7 @@ export const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         <div className="relative">
           <div className="absolute inset-0 animate-glow-pulse rounded-full blur-xl" />
           <img
-            src={logo}
+            src={logoUrl || logo}
             alt="OWR Votes"
             className="relative w-32 h-32 md:w-40 md:h-40 object-contain rounded-2xl shadow-2xl"
           />

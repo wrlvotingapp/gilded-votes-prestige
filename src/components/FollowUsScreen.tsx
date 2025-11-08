@@ -7,6 +7,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import * as LucideIcons from "lucide-react";
 import logo from "@/assets/logo.jpg";
 
+const defaultLogo = logo;
+
 interface SocialMediaLink {
   id: string;
   platform: string;
@@ -28,6 +30,18 @@ export const FollowUsScreen = ({ onComplete }: { onComplete: () => void }) => {
 
       if (error) throw error;
       return data as SocialMediaLink[];
+    },
+  });
+
+  const { data: logoUrl } = useQuery({
+    queryKey: ["app-logo"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("app_settings")
+        .select("setting_value")
+        .eq("setting_key", "logo_url")
+        .maybeSingle();
+      return data?.setting_value || defaultLogo;
     },
   });
 
@@ -63,7 +77,7 @@ export const FollowUsScreen = ({ onComplete }: { onComplete: () => void }) => {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <img
-              src={logo}
+              src={logoUrl || defaultLogo}
               alt="OWR Votes"
               className="w-24 h-24 object-contain rounded-2xl shadow-lg"
             />
